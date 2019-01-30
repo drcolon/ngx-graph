@@ -62,7 +62,7 @@ const defaultDagreLayout: DagreLayout = {
   ranksep: 100,
   acyclicer: undefined,
   ranker: 'network-simplex',
-  align: undefined,
+  align: undefined
 };
 
 @Component({
@@ -443,9 +443,9 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       const l = this.graph._edgeLabels[k];
 
       const normKey = k.replace(/[^\w-]*/g, '');
-      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}` === normKey);
+      let oldLink = this._oldLinks.find(ol => `${ol.source}${ol.target}${ol.id}` === normKey);
       if (!oldLink) {
-        oldLink = this._links.find(nl => `${nl.source}${nl.target}` === normKey);
+        oldLink = this._links.find(nl => `${nl.source}${nl.target}${nl.id}` === normKey);
       }
 
       oldLink.oldLine = oldLink.line;
@@ -536,7 +536,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
    * @memberOf GraphComponent
    */
   createGraph(): void {
-    this.graph = new dagre.graphlib.Graph();
+    this.graph = new dagre.graphlib.Graph({ multigraph: true });
     this.graph.setGraph({
       rankdir: this.orientation,
       nodesep: this.dagreLayout.nodesep ? this.dagreLayout.nodesep : defaultDagreLayout.nodesep,
@@ -546,7 +546,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
       align: this.dagreLayout.align ? this.dagreLayout.align : defaultDagreLayout.align,
       ranker: this.dagreLayout.ranker ? this.dagreLayout.ranker : defaultDagreLayout.ranker,
       marginx: 20,
-      marginy: 20,
+      marginy: 20
       // acyclicer: 'greedy',
       // ranker: 'longest-path'
     });
@@ -588,9 +588,8 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
 
     // update dagre
     for (const edge of this._links) {
-      this.graph.setEdge(edge.source, edge.target);
+      this.graph.setEdge(edge.source, edge.target, edge, edge.id);
     }
-
     requestAnimationFrame(() => this.draw());
   }
 
@@ -1016,7 +1015,7 @@ export class GraphComponent extends BaseChartComponent implements OnInit, OnDest
     if (zoomLevel <= this.minZoomLevel || zoomLevel >= this.maxZoomLevel) {
       return;
     }
-    
+
     if (zoomLevel !== this.zoomLevel) {
       this.zoomLevel = zoomLevel;
       this.updateTransform();
